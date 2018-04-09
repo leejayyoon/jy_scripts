@@ -1,8 +1,7 @@
 import getopt
 import subprocess
 import time
-from os import listdir
-from os.path import isfile, join
+import os
 from ParseTrees import *
 from Alphabet import *
 
@@ -29,22 +28,74 @@ class JaggedBatches(object):
 def load_trees_from_ptb_dir(input_dir):
     result = []
     print 'Loading parse trees from top-level dir:', input_dir 
-    for sub_dir in listdir(input_dir):
-        if not isfile(join(input_dir,sub_dir)):
+    for sub_dir in os.listdir(input_dir):
+        if not os.path.isfile(os.path.join(input_dir,sub_dir)):
             print '  ',sub_dir
-            for parse_file in listdir(join(input_dir,sub_dir)):
-                parses = load_trees(join(input_dir,sub_dir,parse_file))
+            for parse_file in os.listdir(os.path.join(input_dir,sub_dir)):
+                # if sub_dir == '05':
+                #     print('file_name: %s' %parse_file)
+                print '      parse_file:', parse_file
+                parses = load_trees(os.path.join(input_dir,sub_dir,parse_file))
+                if parses is None:
+                    continue
                 result = result + parses
                 print '      loaded ', len(parses), 'parses. Total:',len(result)
     print 'Done loading ', len(result),'parses from', input_dir
     return result
 
-def create_encoder_decoder_file(input_dir, output_file, include_null):
-    result = load_trees_from_ptb_dir(input_dir)
+
+def load_trees_from_ptb_dir_recursive(input_dir, result):
+    for _element in os.listdir(input_dir):
+        full_path= os.path.join(input_dir,_element)
+        if not os.path.isfile(full_path):
+            print '  sub_dir:\t',_element
+            result = result + load_trees_from_ptb_dir_recursive(full_path, result)
+        else:
+            print '  file:\t',_element
+            parses = load_trees(full_path)
+            result = result + parses
+            print '      loaded ', len(parses), 'parses. Total:',len(result)
+    print 'Done loading ', len(result),'parses from', input_dir
+    return result
+
+
+
+# def load_trees_from_ptb_dir_new(input_dir):
+#     result = []
+#     print 'Loading parse trees from top-level dir:', input_dir 
+#     for sub_dir in os.listdir(input_dir):
+#         if not os.path.isfile(os.path.join(input_dir,sub_dir)):
+#             print '  ',sub_dir
+#             for parse_file in os.listdir(os.path.join(input_dir,sub_dir)):
+#                 # if sub_dir == '05':
+#                 #     print('file_name: %s' %parse_file)
+#                 parses = load_trees(os.path.join(input_dir,sub_dir,parse_file))
+#                 result = result + parses
+#                 print '      loaded ', len(parses), 'parses. Total:',len(result)
+#     print 'Done loading ', len(result),'parses from', input_dir
+#     return result
+
+
+def create_encoder_decoder_file(input_dir, output_file, include_null, superset=False):
+    if superset:
+        result = []
+        print 'Loading parse trees from top-level dir:', input_dir 
+        result = load_trees_from_ptb_dir_recursive(input_dir, result)
+    else:
+        result = load_trees_from_ptb_dir(input_dir)
+
     if not include_null:
         for tree in result:
             remove_null_elements(tree)
     print 'Creating encoder-decoder file:',output_file
+    
+    if not os.path.exists(os.path.dirname(output_file)):
+        try:
+            os.makedirs(os.path.dirname(output_file))
+        except OSError as exc: # Guard against race condition
+            if exc.errno != errno.EEXIST:
+                raise
+
     outf = open(output_file,'w')
     num_invalid=0
     num_mismatches=0
@@ -118,14 +169,25 @@ def doc_tree_to_sentence_forest(doc_tree):
     sentence_trees = [tree for tree in doc_tree.children]
     for sentence_tree in sentence_trees:
         sentence_tree.set_parent(None)
-    sentence_trees = [get_sentence_root(tree) for tree in sentence_trees]
+
+    sentence_trees = [get_sentence_root(tree, i) for tree, i \
+                        in zip(sentence_trees, range(len(sentence_trees)))]
     return sentence_trees
 
-def get_sentence_root(tree):
+def get_sentence_root(tree, index):
     assert(tree.is_root())
     sentence_root=tree
     if not tree.is_sentence_root():
-        assert(tree.num_children() == 1)
+        try:
+            assert(tree.num_children() == 1)
+        except AssertionError:
+            print(index)
+            print('tree.num_children() %d' %tree.num_children())
+            tree.print_tree()
+            for i in range(tree.num_children()):
+                print('children %d')
+                tree.children[i].print_tree()
+            raise 
         #print '\nPARENT--------'
         #sentence_root.print_tree()
         sentence_root = sentence_root.children[0]
