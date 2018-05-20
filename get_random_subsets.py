@@ -28,15 +28,15 @@ def make_sample_files(enc_fname, dec_fname, ratio_list =[0.25, 0.5, 0.75]):
 		get_sample_lines(dec_lines, dec_out_fname, rand_idx, sample_size)
 
 if __name__ == "__main__":
-	argparser = argparse.ArgumentParser()
+    argparser = argparse.ArgumentParser()
     argparser.add_argument("-fenc", "--enc_filename", required=True)
     argparser.add_argument("-fdec", "--dec_filename", required=True)
     argparser.add_argument("-r", "--ratio_list")
     args = argparser.parse_args()
 
-    if args.ratio:
+    if args.ratio_list:
     	ratio_list = args.ratio.split(',')
     else:
     	ratio_list = [0.25,0.5,0.75]
     make_sample_files(args.enc_filename, args.dec_filename, ratio_list =ratio_list)
-	# make_sample_files('../datadir/split-train_encode', '../datadir/split-train_decode')
+    # make_sample_files('../datadir/split-train_encode', '../datadir/split-train_decode')
