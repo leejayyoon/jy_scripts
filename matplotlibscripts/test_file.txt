@@ -1,0 +1,4 @@
+tid	uid	tlocaldate	cat1	cat2	vpnp	vp
+121414	13131	1	event	conference	talking small experiments	talking
+09934	223	2	a&e	museum	insatlling new exhibitis	installing
+00343	833	3	travel	airport	leabing austin	leaving

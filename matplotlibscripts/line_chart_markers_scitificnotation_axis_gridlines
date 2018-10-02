@@ -1,0 +1,64 @@
+
+#!/usr/bin/python
+import matplotlib
+from matplotlib import colors
+from matplotlib import pyplot
+import numpy as np
+
+
+my_color = {"grey": colors.colorConverter.to_rgb("#4D4D4D"),
+            "blue": colors.colorConverter.to_rgb("#5DA5DA"),
+            "orange": colors.colorConverter.to_rgb("#FAA43A"),
+            "green": colors.colorConverter.to_rgb("#60BD68"),
+            "pink": colors.colorConverter.to_rgb("#F17CB0"),
+            "brown": colors.colorConverter.to_rgb("#B2912F"),
+            "purple": colors.colorConverter.to_rgb("#B276B2"),
+            "yellow": colors.colorConverter.to_rgb("#DECF3F"),
+            "red": colors.colorConverter.to_rgb("#F15854")}
+xl = [1, 2, 4, 6, 8]
+x = [1, 2, 4, 6]
+xs = [1, 2, 4]
+
+x1 = [4, 8, 16, 24]
+x2 = [8, 16, 32, 48]
+x3 = [12, 24, 48]
+y1 = np.array([7709784.4703, 15491889.9648, 30892404.7920, 46320105.1177])
+y2 = np.array([15428313.8734, 30922555.7547, 61928427.6715, 92717884.1474])
+y3 = np.array([18243480,  37514368.1813, 74295507.7579])
+y4 = np.array([7724855.1876, 15491889.9648, 31131159.0797, 46801830.9527])
+y5 = np.array([15450094.3925, 31095966.9752, 62802597.3068, 93083629.1240])
+y6 = np.array([18604575.4403, 38131551.1241, 74782714.4211])
+# y2x = np.array(15640273.7048, 32010003.1260, 55351351.3514, 69189189.1892)
+# y3x = np.array([10427486.2019, 20830790.5122, 38143485.0630, 65565373.2872])
+# y2 = np.array([696694.1231, 2781131.335, 9905468.6984, 32230220.92])
+fig, ax1 = pyplot.subplots(figsize=(8, 3.8))
+ax1.plot(x1, y1, color=my_color["blue"],
+         label='1:4 - Synthetic - light skew', linewidth=3.0, marker="o")
+
+ax1.plot(x2, y2, color=my_color["orange"],
+         label='1:8 - Synthetic - light skew', linewidth=3.0, marker="^")
+
+ax1.plot(x3, y3, color=my_color["pink"],
+         label='1:12 - Synthetic - light skew', linewidth=3.0, marker="s")
+
+ax1.plot(x1, y4, color=my_color["brown"],
+         label='1:4 - Database traces', linewidth=3.0, marker="o")
+ax1.plot(x2, y5, color=my_color["purple"],
+         label='1:8 - Database traces', linewidth=3.0, marker="^")
+ax1.plot(x3, y6, color=my_color["red"],
+         label='1:12 - Database traces', linewidth=3.0, marker="8")
+
+
+lines, labels = ax1.get_legend_handles_labels()
+ax1.set_xlabel("# Client Nodes", fontsize=20)
+ax1.set_ylabel("Insert Rate (op/s)", fontsize=20)
+ax1.legend(lines, labels, loc="upper left", fontsize=12)
+ax1.set_xlim([0, 50])
+ax1.set_ylim([0, 120000000])
+ax1.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+ax1.yaxis.grid(True)
+
+pyplot.tight_layout()
+
+#pyplot.savefig("ingestion.eps")
+pyplot.savefig("../figures/scaling_insertion.pdf")
