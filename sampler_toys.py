@@ -44,9 +44,12 @@ print("std of prop_samples", np.sqrt(np.var(prop_samples)))
 # plot
 fig0, ax0 = plt.subplots()
 count, bins, ignored = ax0.hist(prop_samples, 30, normed=True)
-ax0.plot(bins, 1/(sigma_prop * np.sqrt(2 * np.pi)) *
+if proposal_dist=='unif':
+	ax0.plot(bins, np.ones_like(bins)*1/(u_high-u_low),linewidth=2, color='r')
+else:
+	ax0.plot(bins, 1/(sigma_prop * np.sqrt(2 * np.pi)) *
 		np.exp( - (bins - mu_p)**2 / (2 * sigma_prop**2) ),
-		linewidth=2, color='r')
+		linewidth=2, color='v')
 plt.savefig("proposed.pdf")
 print("===================================================")
 if proposal_dist=='unif':
